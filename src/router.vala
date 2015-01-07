@@ -6,6 +6,7 @@ namespace Valum {
 
 	public class Router {
 
+		public Map<string, string> types = new HashMap<string, string> ();
 		private HashMap<string, ArrayList<Route>> routes = new HashMap<string, ArrayList> ();
 		private string[] _scope;
 
@@ -29,6 +30,10 @@ namespace Valum {
 		public delegate void NestedRouter(Valum.Router app);
 
 		public Router() {
+
+			// initialize default types
+			this.types["int"]    = "\\d+";
+			this.types["string"] = "\\w+";
 
 #if (BENCHMARK)
 			var timer  = new Timer();
@@ -101,15 +106,21 @@ namespace Valum {
 		//
 		private void route(string method, string rule, Route.RequestCallback cb) {
 			string full_rule = "";
+
+			// scope the route
 			for (var seg = 0; seg < this._scope.length; seg++) {
 				full_rule += "/";
 				full_rule += this._scope[seg];
 			}
+
+			// prepend the root
 			full_rule += "/%s".printf(rule);
+
 			if (!this.routes.has_key(method)){
 				this.routes[method] = new ArrayList<Route> ();
 			}
-			this.routes[method].add(new Route(full_rule, cb));
+
+			this.routes[method].add(new Route.from_rule (this, full_rule, cb));
 		}
 
 		// Handler code
