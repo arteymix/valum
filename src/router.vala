@@ -7,6 +7,15 @@ namespace Valum {
 	public class Router {
 
 		/**
+		 * Registered types used to match route parameters.
+         *
+		 * A key is a type identifier (eg. int) and a value is the
+		 * corresponding regular expression that matches that type (eg. \d+ for
+		 * int).
+		 */
+		public Map<string, string> types = new HashMap<string, string> ();
+
+		/**
 		 * Registered routes by HTTP method.
 		 */
 		private Map<string, ArrayList<Route>> routes = new HashMap<string, ArrayList> ();
@@ -36,6 +45,10 @@ namespace Valum {
 		public delegate void NestedRouter(Valum.Router app);
 
 		public Router() {
+
+			// initialize default types
+			this.types["int"]    = "\\d+";
+			this.types["string"] = "\\w+";
 
 #if (BENCHMARK)
 			var timer  = new Timer();
@@ -121,7 +134,7 @@ namespace Valum {
 				this.routes[method] = new ArrayList<Route> ();
 			}
 
-			this.routes[method].add (new Route(full_rule.str, cb));
+			this.routes[method].add(new Route.from_rule (this, full_rule.str, cb));
 		}
 
 		// Handler code
