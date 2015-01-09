@@ -19,6 +19,7 @@ Router
  - register types at dynamic time using an Map
  - optional/nullable route parameter
  - regex literal in route declaration
+ - reverse path for a given route
 
 View Engines
 ------------

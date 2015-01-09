@@ -95,5 +95,15 @@ namespace Valum {
 			}
 			this.callback (req, res);
 		}
+
+		/**
+		 * Reverse the path of this route.
+
+		 * TODO: check Regex api if it is supported natively, otherwise use a
+		 *       substitution regex.
+		 */
+		public string path (Map<string, string>? params) {
+			return "";
+		}
 	}
 }

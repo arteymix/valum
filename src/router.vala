@@ -69,57 +69,65 @@ namespace Valum {
 		//
 		// HTTP Verbs
 		//
-		public new void get(string rule, Route.RequestCallback cb) {
-			this.route("GET", rule, cb);
+		public new Route get(string rule, Route.RequestCallback cb) {
+			return this.route("GET", rule, cb);
 		}
 
-		public void post(string rule, Route.RequestCallback cb) {
-			this.route("POST", rule, cb);
+		public Route post(string rule, Route.RequestCallback cb) {
+			return this.route("POST", rule, cb);
 		}
 
-		public void put(string rule, Route.RequestCallback cb) {
-			this.route("PUT", rule, cb);
+		public Route put(string rule, Route.RequestCallback cb) {
+			return this.route("PUT", rule, cb);
 		}
 
-		public void delete(string rule, Route.RequestCallback cb) {
-			this.route("DELETE", rule, cb);
+		public Route delete(string rule, Route.RequestCallback cb) {
+			return this.route("DELETE", rule, cb);
 		}
 
-		public void head(string rule, Route.RequestCallback cb) {
-			this.route("HEAD", rule, cb);
+		public Route head(string rule, Route.RequestCallback cb) {
+			return this.route("HEAD", rule, cb);
 		}
 
-		public void options(string rule, Route.RequestCallback cb) {
-			this.route("OPTIONS", rule, cb);
+		public Route options(string rule, Route.RequestCallback cb) {
+			return this.route("OPTIONS", rule, cb);
 		}
 
-		public void trace(string rule, Route.RequestCallback cb) {
-			this.route("TRACE", rule, cb);
+		public Route trace(string rule, Route.RequestCallback cb) {
+			return this.route("TRACE", rule, cb);
 		}
 
-		public void connect(string rule, Route.RequestCallback cb) {
-			this.route("CONNECT", rule, cb);
+		public Route connect(string rule, Route.RequestCallback cb) {
+			return this.route("CONNECT", rule, cb);
 		}
 
 		// http://tools.ietf.org/html/rfc5789
-		public void patch(string rule, Route.RequestCallback cb) {
-			this.route("PATCH", rule, cb);
+		public Route patch(string rule, Route.RequestCallback cb) {
+			return this.route("PATCH", rule, cb);
 		}
 
+		/**
+		 * Like a scope, but does not push a fragment on the scope stack.
+         *
+		 * This is useful if you want to isolate a part of your application
+		 */
+		public void closure (NestedRouter router) {
+			router (this);
+		}
 
 		//
 		// Routing helpers
 		//
-		public void scope(string fragment, NestedRouter router) {
+		public void scope (string fragment, NestedRouter router) {
 			this.scopes.add (fragment);
-			router(this);
+			router (this);
 			this.scopes.remove_at (this.scopes.size - 1);
 		}
 
 		//
 		// Routing and request handling machinery
 		//
-		private void route(string method, string rule, Route.RequestCallback cb) {
+		private Route route (string method, string rule, Route.RequestCallback cb) {
 			var full_rule = new StringBuilder ();
 
 			// scope the route
@@ -134,7 +142,12 @@ namespace Valum {
 				this.routes[method] = new ArrayList<Route> ();
 			}
 
-			this.routes[method].add(new Route.from_rule (this, full_rule.str, cb));
+			var route = new Route.from_rule (this, full_rule.str, cb);
+
+			// register the route for the given method
+			this.routes[method].add (route);
+
+			return route;
 		}
 
 		// Handler code

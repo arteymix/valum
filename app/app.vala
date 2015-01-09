@@ -38,9 +38,15 @@ app.get("hello/", (req, res) => {
 });
 
 // example using route parameter
-app.get("hello/<id>", (req, res) => {
+var hello = app.get("hello/<id>", (req, res) => {
 	res.mime = "text/plain";
 	res.append("hello %s!".printf(req.params["id"]));
+});
+
+app.get("reversed-route", (req, res) => {
+	var params = new Gee.HashMap<string, string> ();
+	params["id"] = "5";
+	res.append("""<a href="%s">%s</a>""".printf (hello.path (params), hello.path (params)));
 });
 
 app.scope("urlencoded-data", (inner) => {
