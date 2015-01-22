@@ -13,6 +13,14 @@ namespace Valum {
 		private weak Router router;
 
 		/**
+		 * Rule that generated the regular expression.
+         *
+		 * This will be null if the Route has been initialized using a regular
+		 * expression.
+		 */
+		private string? rule;
+
+		/**
 		 * Regular expression matching the Request path.
 		 */
 		private Regex regex;
@@ -47,9 +55,8 @@ namespace Valum {
 			this.captures = new ArrayList<string> ();
 			this.callback = callback;
 
-			var route = new StringBuilder ("^");
-
 			try {
+				var route = new StringBuilder ("^");
 				var param_regex = new Regex ("(<(?:\\w+:)?\\w+>)");
 				var params = param_regex.split_full (rule);
 
@@ -98,12 +105,12 @@ namespace Valum {
 
 		/**
 		 * Reverse the path of this route.
-
+         *
 		 * TODO: check Regex api if it is supported natively, otherwise use a
 		 *       substitution regex.
 		 */
-		public string path (Map<string, string>? params) {
-			return "";
+		public string path_for (Map<string, string>? params = null) {
+			return this.rule;
 		}
 	}
 }

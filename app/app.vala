@@ -46,7 +46,7 @@ var hello = app.get("hello/<id>", (req, res) => {
 app.get("reversed-route", (req, res) => {
 	var params = new Gee.HashMap<string, string> ();
 	params["id"] = "5";
-	res.append("""<a href="%s">%s</a>""".printf (hello.path (params), hello.path (params)));
+	res.append("""<a href="%s">lol</a>""".printf (hello.path_for (params)));
 });
 
 app.scope("urlencoded-data", (inner) => {
