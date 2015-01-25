@@ -25,11 +25,10 @@ app.handler.connect_after ((req, res) => {
 
 // default route
 app.get("", (req, res) => {
-	var template =  new Valum.View.Tpl.from_path("app/templates/home.html");
+	var template =  new Valum.View.from_path("app/templates/home.html");
 
-	template.vars["path"]    = req.message.uri.get_path ();
-	template.vars["query"]   = req.message.uri.get_query ();
-	template.vars["headers"] = req.headers;
+	template.environment.push_string ("path", req.message.uri.get_path ());
+	template.environment.push_string ("query", req.message.uri.get_query ());
 
 	res.append(template.render());
 });
@@ -107,7 +106,7 @@ app.get("lua.haml", (req, res) => {
 });
 
 // precompiled template
-var tpl = new Valum.View.Tpl.from_string("""
+var tpl = new Valum.View.from_string("""
    <p> hello {foo} </p>
    <p> hello {bar} </p>
    <ul>
@@ -124,10 +123,10 @@ app.get("ctpl/<foo>/<bar>", (req, res) => {
 	arr.add("omg");
 	arr.add("typed hell");
 
-	tpl.vars["foo"] = req.params["foo"];
-	tpl.vars["bar"] = req.params["bar"];
-	tpl.vars["arr"] = arr;
-	tpl.vars["int"] = 1;
+	tpl.environment.push_string ("foo", req.params["foo"]);
+	tpl.environment.push_string ("bar", req.params["bar"]);
+	tpl.push_collection ("arr", arr);
+	tpl.environment.push_int ("int", 1);
 
 	res.append(tpl.render ());
 });
@@ -178,9 +177,9 @@ app.regex ("GET", /\/custom-regular-expression$/, (req, res) => {
 });
 
 app.get("<any:path>", (req, res) => {
-	var template =  new Valum.View.Tpl.from_path("app/templates/404.html");
+	var template =  new Valum.View.from_path("app/templates/404.html");
 
-	template.vars["path"] = req.path;
+	template.environment.push_string ("path", req.path);
 
 	res.status = 404;
 	res.append(template.render());
@@ -188,7 +187,7 @@ app.get("<any:path>", (req, res) => {
 
 var server = new Soup.Server(Soup.SERVER_SERVER_HEADER, Valum.APP_NAME);
 
-// bind the application to the server
+// push the application to the server
 server.add_handler("/", app.soup_handler);
 
 server.listen_all(3003, Soup.ServerListenOptions.IPV4_ONLY);
