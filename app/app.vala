@@ -10,6 +10,19 @@ mcd.add_server("127.0.0.1", 11211);
 // extra route types
 app.types["permutations"] = "abc|acb|bac|bca|cab|cba";
 
+var timer  = new Timer();
+
+app.handler.connect ((req, res) => {
+	timer.start();
+});
+
+app.handler.connect_after ((req, res) => {
+	timer.stop ();
+	var elapsed = timer.elapsed ();
+	res.headers.append ("X-Runtime", "%8.3fms".printf(elapsed * 1000));
+	message ("%s computed in %8.3fms", req.path, elapsed * 1000);
+});
+
 // default route
 app.get("", (req, res) => {
 	var template =  new Valum.View.Tpl.from_path("app/templates/home.html");
@@ -162,18 +175,27 @@ app.scope("admin", (adm) => {
 	});
 });
 
-app.default_request.connect((req, res) => {
+app.method ("GET", "custom-method", (req, res) => {
+	res.append (req.message.method);
+});
+
+app.regex ("GET", /\/custom-regular-expression$/, (req, res) => {
+	res.append ("This route was matched using a custom regular expression.");
+});
+
+app.get("<any:path>", (req, res) => {
 	var template =  new Valum.View.Tpl.from_path("app/templates/404.html");
 
 	template.vars["path"] = req.path;
 
+	res.status = 404;
 	res.append(template.render());
 });
 
 var server = new Soup.Server(Soup.SERVER_SERVER_HEADER, Valum.APP_NAME);
 
 // bind the application to the server
-server.add_handler("/", app.request_handler);
+server.add_handler("/", app.soup_handler);
 
 server.listen_all(3003, Soup.ServerListenOptions.IPV4_ONLY);
 

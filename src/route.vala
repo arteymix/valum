@@ -29,20 +29,21 @@ namespace Valum {
 		 * Remembers what names have been defined in the regular expression to
 		 * build the Request params Map.
 		 */
-		private Gee.List<string> captures;
+		private Gee.List<string> captures = new ArrayList<string> ();
 
 		private unowned RequestCallback callback;
 
-		public delegate void RequestCallback(Request req, Response res);
+		public delegate void RequestCallback (Request req, Response res);
 
 		/**
 		 * Create a Route for a given callback using a Regex.
 		 */
-		public Route (Router router, Regex regex, Gee.List<string> captures, RequestCallback callback) {
+		public Route (Router router, Regex regex, RequestCallback callback) {
 			this.router   = router;
 			this.regex    = regex;
-			this.captures = captures;
 			this.callback = callback;
+
+			// TODO: extract the capture from the Regex
 		}
 
 		/**
@@ -52,7 +53,7 @@ namespace Valum {
 		 */
 		public Route.from_rule (Router router, string rule, RequestCallback callback) {
 			this.router   = router;
-			this.captures = new ArrayList<string> ();
+			this.rule     = rule;
 			this.callback = callback;
 
 			try {
@@ -63,16 +64,15 @@ namespace Valum {
 				foreach (var p in params) {
 					if(p[0] != '<') {
 						// regular piece of route
-						route.append (Regex.escape_string(p));
+						route.append (Regex.escape_string (p));
 					} else {
 						// extract parameter
-						var cap  = p.slice(1, p.length - 1).split(":", 2);
+						var cap  = p.slice (1, p.length - 1).split (":", 2);
 						var type = cap.length == 1 ? "string" : cap[0];
-						var key  = cap.length == 1 ? cap[0] : cap[1];
+						var key = cap.length == 1 ? cap[0] : cap[1];
 
-						if (!(type in this.router.types)) {
-							warning ("undefined parameter type %s for key %s", type, key);
-						}
+						// TODO: support any type with a HashMap<string, string>
+						var types = new HashMap<string, string> ();
 
 						captures.add (key);
 						route.append ("(?<%s>%s)".printf (key, this.router.types[type]));
@@ -88,18 +88,23 @@ namespace Valum {
 			}
 		}
 
+		private MatchInfo last_matchinfo;
+
 		public bool matches (string path) {
-			return this.regex.match (path, 0);
+			return this.regex.match (path, 0, out this.last_matchinfo);
 		}
 
+		/**
+		 * Extract the Request parameters from URI and execute the route callack.
+		 *
+		 * Calling fire asssumes you have already called matches as it will reuse the
+		 * MatchInfo object.
+		 */
 		public void fire (Request req, Response res) {
-			MatchInfo matchinfo;
-			// initialize Request parameters
-			if (this.regex.match (req.path, 0, out matchinfo)) {
-				foreach (var cap in captures) {
-					req.params[cap] = matchinfo.fetch_named (cap);
-				}
+			foreach (var cap in captures) {
+				req.params[cap] = this.last_matchinfo.fetch_named (cap);
 			}
+
 			this.callback (req, res);
 		}
 
