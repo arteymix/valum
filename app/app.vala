@@ -107,8 +107,8 @@ app.get("lua.haml", (req, res) => {
 
 // precompiled template
 var tpl = new Valum.View.from_string("""
-   <p> hello {foo} </p>
-   <p> hello {bar} </p>
+   <p> hello {params_foo} </p>
+   <p> hello {params_bar} </p>
    <ul>
 	 { for el in arr }
 	   <li> { el } </li>
@@ -119,14 +119,18 @@ var tpl = new Valum.View.from_string("""
 // Ctpl template rendering
 app.get("ctpl/<foo>/<bar>", (req, res) => {
 
-	var arr = new Gee.ArrayList<Value?>();
-	arr.add("omg");
-	arr.add("typed hell");
+	var arr = new int[2];
 
-	tpl.environment.push_string ("foo", req.params["foo"]);
-	tpl.environment.push_string ("bar", req.params["bar"]);
-	tpl.push_collection ("arr", arr);
+	arr[0] = 5;
+	arr[1] = 2;
+
+	tpl.push_map ("params", req.params);
+
+	tpl.push_ints ("arr", arr);
+
 	tpl.environment.push_int ("int", 1);
+	tpl.environment.push_float ("float", 1.0);
+	tpl.environment.push_string ("string", "test");
 
 	res.append(tpl.render ());
 });
