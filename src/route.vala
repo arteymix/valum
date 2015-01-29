@@ -124,8 +124,6 @@ namespace Valum {
 				}
 				return false;
 			};
-
-			info ("registered %s", route.str);
 		}
 
 		/**
