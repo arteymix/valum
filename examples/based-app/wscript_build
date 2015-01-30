@@ -5,5 +5,5 @@ bld.program(
     target    = 'app',
     use       = 'valum',
     source    = ['app.vala'],
-    uselib    = ['GLIB', 'SOUP', 'GEE', 'CTPL'],
+    uselib    = ['GLIB', 'SOUP', 'GEE', 'CTPL', 'NM'],
     vapi_dirs = ['../../vapi'])

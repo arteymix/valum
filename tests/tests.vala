@@ -39,6 +39,8 @@ public class TestRequest : VSGI.Request {
 		}
 	}
 
+	public override HashTable<string, string>? session { owned get { return new HashTable <string, string> (str_hash, str_equal); } set {} }
+
 	public TestRequest (string method, Soup.URI uri, HashTable<string, string>? query = null) {
 		this._method = method;
 		this._uri    = uri;
