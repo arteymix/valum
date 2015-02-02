@@ -265,6 +265,38 @@ app.matcher (Request.GET, (req) => { return req.uri.get_path () == "/custom-matc
 	writer.put_string ("This route was matched using a custom matcher.");
 });
 
+app.scope ("session", (inner) => {
+	inner.get("", (req, res) => {
+		if (req.session == null) {
+			res.status = 404;
+		} else {
+			var writer = new DataOutputStream(res);
+			req.session.@foreach ((k, v) => {
+				writer.put_string ("%s: %s\n".printf(k, v));
+			});
+		}
+	});
+	inner.delete ("", (req, res) => {
+		req.session = null;
+	});
+	inner.get ("<key>", (req, res) => {
+		if (req.session == null)
+			res.status = 404;
+		else if (req.session.contains (req.params["key"])) {
+			var writer = new DataOutputStream(res);
+			writer.put_string (req.params["key"]);
+		} else {
+			res.status = 404;
+		}
+	});
+	inner.post ("<key>", (req, res) => {
+		var session = req.session == null ? new HashTable<string, string> (str_hash, str_equal) : req.session;
+		var reader = new DataInputStream (req);
+		session[req.params["key"]] = reader.read_line ();
+		req.session = session;
+	});
+});
+
 app.get("<any:path>", (req, res) => {
 
 	res.status = 404;
