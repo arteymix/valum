@@ -23,9 +23,9 @@ Debian and Ubuntu
 -----------------
 
 ```bash
-apt-get install git-core build-essential python valac libglib2.0-dev \
-                libsoup2.4-dev libgee-0.8-dev libfcgi-dev memcached \
-                libmemcached-dev libluajit-5.1-dev libctpl-dev
+apt-get install git-core build-essential python valac libglib2.0-bin \
+                libglib2.0-dev libsoup2.4-dev libgee-0.8-dev libfcgi-dev \
+                memcached libmemcached-dev libluajit-5.1-dev libctpl-dev
 ```
 
 Fedora
